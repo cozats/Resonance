@@ -40,12 +40,16 @@
         "zip"
       ],
       "icon": "assets/icon.png",
-      "hardenedRuntime": true,
+      "identity": null,
+      "hardenedRuntime": false,
       "gatekeeperAssess": false
     },
     "win": {
       "target": "nsis",
-      "icon": "assets/icon.png"
+      "icon": "assets/icon.png",
+      "signingHashAlgorithms": [
+        "sha256"
+      ]
     },
     "linux": {
       "target": "AppImage",
@@ -65,7 +69,8 @@
         "to": "whisper",
         "filter": [
           "!venv",
-          "!whisper.cpp"
+          "!whisper.cpp",
+          "!.gitkeep"
         ]
       }
     ]
