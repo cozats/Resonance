@@ -22,6 +22,14 @@ Resonance is a desktop application that provides high-quality audio and video tr
 - macOS (Intel or Apple Silicon)
 - Python 3.9+
 - [ffmpeg](https://ffmpeg.org/) installed (`brew install ffmpeg`)
+- **macOS Users**: If you see "App can't be opened because it's from an unidentified developer", run this command in Terminal:
+  ```bash
+  # For App in Applications folder (Default)
+  xattr -dr com.apple.quarantine /Applications/Resonance.app
+  
+  # For any other path
+  xattr -dr com.apple.quarantine /path/to/Resonance.app
+  ```
 
 ### Installation
 
