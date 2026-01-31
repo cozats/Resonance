@@ -6,6 +6,9 @@ on:
       - 'v*'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -46,6 +49,7 @@ jobs:
         with:
           name: Resonance-${{ matrix.os }}
           path: dist/*.{dmg,exe,AppImage,zip}
+          if-no-files-found: error
 
   release:
     needs: build
@@ -62,9 +66,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            artifacts/**/*.dmg
-            artifacts/**/*.exe
-            artifacts/**/*.AppImage
-            artifacts/**/*.zip
+            artifacts/Resonance-macos-latest/*.dmg
+            artifacts/Resonance-windows-latest/*.exe
+            artifacts/Resonance-ubuntu-latest/*.AppImage
+            artifacts/Resonance-*/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
