@@ -1,6 +1,6 @@
 {
   "name": "resonance",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Local AI-powered transcription for creators and professionals",
   "productName": "Resonance",
   "main": "src/main.js",

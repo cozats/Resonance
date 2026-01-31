@@ -14,6 +14,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     strategy:
+      fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
 
@@ -48,8 +49,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Resonance-${{ matrix.os }}
-          path: dist/*.{dmg,exe,AppImage,zip}
-          if-no-files-found: error
+          path: dist/*
+          if-no-files-found: warn
 
   release:
     needs: build
@@ -65,10 +66,14 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
+          name: Resonance v${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
           files: |
-            artifacts/Resonance-macos-latest/*.dmg
-            artifacts/Resonance-windows-latest/*.exe
-            artifacts/Resonance-ubuntu-latest/*.AppImage
-            artifacts/Resonance-*/*.zip
+            artifacts/**/*.dmg
+            artifacts/**/*.exe
+            artifacts/**/*.AppImage
+            artifacts/**/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
