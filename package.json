@@ -42,19 +42,22 @@
       "icon": "assets/icon.png",
       "identity": null,
       "hardenedRuntime": false,
-      "gatekeeperAssess": false
+      "gatekeeperAssess": false,
+      "artifactName": "${productName}-${version}.${ext}"
     },
     "win": {
       "target": "nsis",
       "icon": "assets/icon.png",
       "signingHashAlgorithms": [
         "sha256"
-      ]
+      ],
+      "artifactName": "${productName}-${version}.${ext}"
     },
     "linux": {
       "target": "AppImage",
       "icon": "assets/icon.png",
-      "category": "Office"
+      "category": "Office",
+      "artifactName": "${productName}-${version}.${ext}"
     },
     "nsis": {
       "oneClick": true,
