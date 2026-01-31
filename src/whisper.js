@@ -8,14 +8,32 @@ const path = require('path');
 const fs = require('fs');
 const { app } = require('electron');
 
-// Paths
-const getResourcesPath = () => app.isPackaged 
-  ? process.resourcesPath 
-  : path.join(__dirname, '..');
+// Helper to find executables in common macOS locations
+function findExecutable(name) {
+  const commonPaths = ['/usr/local/bin', '/opt/homebrew/bin', '/usr/bin', '/bin', '/usr/sbin', '/sbin'];
+  for (const dir of commonPaths) {
+    const fullPath = path.join(dir, name);
+    if (fs.existsSync(fullPath)) return fullPath;
+  }
+  return name; // Fallback to raw name if not found in common paths
+}
 
-const WHISPER_DIR = path.join(getResourcesPath(), 'whisper');
-const VENV_DIR = path.join(WHISPER_DIR, 'venv');
-const PYTHON_BIN = path.join(VENV_DIR, 'bin', 'python');
+// Get the writable directory for the whisper environment
+const getWhisperDir = () => path.join(app.getPath('userData'), 'whisper-env');
+const getVenvDir = () => path.join(getWhisperDir(), 'venv');
+const getPythonBin = () => {
+  const venvDir = getVenvDir();
+  return process.platform === 'win32' 
+    ? path.join(venvDir, 'Scripts', 'python.exe')
+    : path.join(venvDir, 'bin', 'python');
+};
+
+// Helper for shell environment with common paths added
+const getShellEnv = () => {
+    const commonPaths = ['/usr/local/bin', '/opt/homebrew/bin', '/usr/bin', '/bin'];
+    const pathValue = [...commonPaths, process.env.PATH].join(process.platform === 'win32' ? ';' : ':');
+    return { ...process.env, PATH: pathValue };
+};
 
 // Model sizes
 const MODELS = {
@@ -30,46 +48,55 @@ const MODELS = {
  * Ensure Python environment with whisper is set up
  */
 async function ensureEnvironment(onStatus) {
-  if (fs.existsSync(PYTHON_BIN)) {
+  const pythonBin = getPythonBin();
+  const whisperDir = getWhisperDir();
+  const venvDir = getVenvDir();
+
+  if (fs.existsSync(pythonBin)) {
     return true;
   }
 
-  await fs.promises.mkdir(WHISPER_DIR, { recursive: true });
+  await fs.promises.mkdir(whisperDir, { recursive: true });
+
+  const shellEnv = getShellEnv();
 
   // Check for python3
+  const python3Path = findExecutable('python3');
   try {
-    execSync('which python3', { stdio: 'pipe' });
+    execSync(`"${python3Path}" --version`, { env: shellEnv, stdio: 'pipe' });
   } catch (e) {
-    throw new Error('Python 3 not found. Please install Python 3.9+');
+    throw new Error('Python 3 not found. Please install Python 3.9+ from python.org or via Homebrew.');
   }
 
   // Check for ffmpeg
+  const ffmpegPath = findExecutable('ffmpeg');
   try {
-    execSync('which ffmpeg', { stdio: 'pipe' });
+    execSync(`"${ffmpegPath}" -version`, { env: shellEnv, stdio: 'pipe' });
   } catch (e) {
-    throw new Error('ffmpeg not found. Install with: brew install ffmpeg');
+    throw new Error('FFmpeg not found. Residency requires FFmpeg for media processing. Please install it (e.g., brew install ffmpeg).');
   }
 
   if (onStatus) onStatus('Setting up Python environment (first run)...');
   
   try {
-    // Create virtual environment
-    execSync(`python3 -m venv "${VENV_DIR}"`, { stdio: 'pipe' });
+    // Create virtual environment using the detected python3
+    execSync(`"${python3Path}" -m venv "${venvDir}"`, { env: shellEnv, stdio: 'pipe' });
     
     if (onStatus) onStatus('Installing whisper (this may take a few minutes)...');
     
     // Install openai-whisper
-    execSync(`"${PYTHON_BIN}" -m pip install --upgrade pip`, { stdio: 'pipe' });
-    execSync(`"${PYTHON_BIN}" -m pip install openai-whisper`, { 
+    execSync(`"${pythonBin}" -m pip install --upgrade pip`, { env: shellEnv, stdio: 'pipe' });
+    execSync(`"${pythonBin}" -m pip install openai-whisper`, { 
+      env: shellEnv,
       stdio: 'pipe',
       timeout: 600000 // 10 minute timeout
     });
     
-    console.log('Whisper environment set up successfully');
+    console.log('Whisper environment set up successfully at:', venvDir);
     return true;
   } catch (e) {
     // Clean up on failure
-    try { fs.rmSync(VENV_DIR, { recursive: true, force: true }); } catch (err) {}
+    try { if(fs.existsSync(venvDir)) fs.rmSync(venvDir, { recursive: true, force: true }); } catch (err) {}
     throw new Error(`Failed to set up whisper: ${e.message}`);
   }
 }
@@ -123,9 +150,12 @@ async function transcribe(filePath, options = {}) {
     return new Promise((resolve, reject) => {
       if (onProgress) onProgress({ status: 'Transcribing...', progress: 30 });
       
-      console.log('Running whisper:', PYTHON_BIN, args.join(' '));
-      const whisper = spawn(PYTHON_BIN, args, {
-        env: { ...process.env, PATH: `${path.dirname(PYTHON_BIN)}:${process.env.PATH}` }
+      const pythonBin = getPythonBin();
+      const shellEnv = getShellEnv();
+      
+      console.log('Running whisper:', pythonBin, args.join(' '));
+      const whisper = spawn(pythonBin, args, {
+        env: shellEnv
       });
       
       let stderr = '';
