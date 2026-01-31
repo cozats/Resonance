@@ -53,19 +53,6 @@ To create a standalone `.dmg` for distribution (macOS):
 npm run build
 ```
 
-### 🚀 Releasing a New Version
-
-Resonance uses GitHub Actions to automatically build and release the app for **macOS, Windows, and Linux**.
-
-1. Update the version in `package.json` (e.g., `"1.0.0"`).
-2. Commit and push your changes.
-3. Create a new Git tag matching the version:
-   ```bash
-   git tag v1.0.0
-   git push origin v1.0.0
-   ```
-4. GitHub Actions will detect the tag, build all versions, and create a new **Release** in your repository.
-
 ## 🛠️ Technology Stack
 
 - **Frontend**: HTML5, CSS3 (Vanilla), JavaScript
