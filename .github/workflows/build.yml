@@ -23,18 +23,15 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
-          cache-dependency-path: Resonance/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install Dependencies
-        run: |
-          cd Resonance
-          npm install
+        run: npm install
 
       - name: Build App
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cd Resonance
           if [ "${{ matrix.os }}" = "macos-latest" ]; then
             npm run build
           elif [ "${{ matrix.os }}" = "windows-latest" ]; then
@@ -48,7 +45,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Resonance-${{ matrix.os }}
-          path: Resonance/dist/*.{dmg,exe,AppImage,zip}
+          path: dist/*.{dmg,exe,AppImage,zip}
 
   release:
     needs: build
