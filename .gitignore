@@ -1,0 +1,8 @@
+node_modules
+dist
+whisper/venv
+whisper/whisper.cpp
+.DS_Store
+*.wav
+_whisper_temp.wav
+models/*.bin

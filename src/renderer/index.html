@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
+    <title>Resonance - AI Transcription</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <img src="../../assets/logo.svg" alt="Resonance" width="32" height="32">
+                </div>
+                <div class="logo-text">
+                    <h1>Resonance</h1>
+                    <span class="subtitle">Local AI</span>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <a class="nav-item active" href="#" data-view="dashboard">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="status-card">
+                    <div class="status-row">
+                        <span class="status-label">Model Status</span>
+                        <span id="model-status" class="status-value ready">Ready</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div>
+                    <h2>Dashboard</h2>
+                    <p id="status-message">Drop files or click to start transcribing.</p>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <!-- Upload Zone -->
+                <section class="upload-section">
+                    <div class="upload-zone-wrapper">
+                        <div id="upload-zone" class="upload-zone">
+                            <div class="upload-icon">
+                                <span class="material-symbols-outlined">cloud_upload</span>
+                            </div>
+                            <h3>New Transcription</h3>
+                            <p class="upload-hint">
+                                Drag and drop your audio or video files here. <br />
+                                <span class="formats">MP3, WAV, MP4, MKV, M4A, OGG, WEBM, FLAC</span>
+                            </p>
+                            <div class="button-group">
+                                <button type="button" id="browse-btn" class="btn btn-primary">
+                                    <span class="material-symbols-outlined">add</span>
+                                    Browse Files
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Model Settings -->
+                    <div class="settings-card">
+                        <h3>
+                            <span class="material-symbols-outlined">auto_awesome</span>
+                            Model Config
+                        </h3>
+                        <div class="form-group">
+                            <label>Whisper Model</label>
+                            <select id="model-select">
+                                <option value="tiny">Tiny - Fastest (~75MB)</option>
+                                <option value="base" selected>Base - Fast, Good Quality (~150MB)</option>
+                                <option value="small">Small - Balanced (~500MB)</option>
+                                <option value="medium">Medium - High Accuracy (~1.5GB)</option>
+                                <option value="large">Large - Best Accuracy (~3GB)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Language</label>
+                            <select id="language-select">
+                                <option value="">Auto-detect (Recommended)</option>
+                                <option value="en">English</option>
+                                <option value="es">Spanish</option>
+                                <option value="fr">French</option>
+                                <option value="de">German</option>
+                                <option value="it">Italian</option>
+                                <option value="pt">Portuguese</option>
+                                <option value="el">Greek</option>
+                                <option value="ja">Japanese</option>
+                                <option value="zh">Chinese</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Output Formats</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="format-srt" checked />
+                                    <span>.SRT</span>
+                                    <span class="format-desc">Subtitles</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="format-txt" checked />
+                                    <span>.TXT</span>
+                                    <span class="format-desc">Plain text</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="format-md" checked />
+                                    <span>.MD</span>
+                                    <span class="format-desc">Markdown</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Output Folder</label>
+                            <div class="folder-input">
+                                <input type="text" id="output-dir" placeholder="Same as source file" readonly />
+                                <button type="button" id="select-folder-btn" class="btn btn-icon">
+                                    <span class="material-symbols-outlined">folder_open</span>
+                                </button>
+                            </div>
+                            <p class="hint">Leave empty to save next to source file</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Jobs Table -->
+                <section class="jobs-section">
+                    <div class="section-header">
+                        <h2>Recent Transcriptions</h2>
+                        <button id="clear-btn" class="btn btn-ghost">
+                            <span class="material-symbols-outlined">delete_sweep</span>
+                            Clear All
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table class="jobs-table">
+                            <thead>
+                                <tr>
+                                    <th>File Name</th>
+                                    <th>Model</th>
+                                    <th>Progress</th>
+                                    <th>Status</th>
+                                    <th class="actions-col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="jobs-table">
+                                <tr id="no-jobs-row">
+                                    <td colspan="5" class="empty-state">
+                                        No transcriptions yet. Upload a file to get started.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
