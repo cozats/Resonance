@@ -46,7 +46,9 @@
       "artifactName": "${productName}-${version}.${ext}"
     },
     "win": {
-      "target": "nsis",
+      "target": [
+        "nsis"
+      ],
       "icon": "assets/icon.png",
       "signingHashAlgorithms": [
         "sha256"
